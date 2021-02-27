@@ -120,6 +120,38 @@ int main(int argc, const char* argv[]) {
     std::cout <<"max_x: " << max_x << '\n' <<"max_y: " << max_y << '\n' << "max_z: " << max_z << '\n'<< '\n';
     std::cout <<"min_x: " << min_x << '\n' <<"min_y: " << min_y << '\n' << "min_z: " << min_z;
 
+    //determine number of voxel cells between min and max of x,y,z
+    int no_x = 0;
+    int no_y = 0;
+    int no_z = 0;
+
+    if (std::fmod((max_x-min_x),voxel_size) == 0){
+        no_x = ((max_x-min_x)/voxel_size);
+    } else {
+        no_x = ((max_x-min_x)/voxel_size)+voxel_size;}
+
+    if (std::fmod((max_y-min_y),voxel_size) == 0){
+        no_y = ((max_y-min_y)/voxel_size);
+    } else {
+        no_y = ((max_y-min_y)/voxel_size)+voxel_size;}
+    std::cout << '\n'<< no_y;
+
+    if (std::fmod((max_z-min_z),voxel_size) == 0){
+        no_z = int ((max_z-min_z)/voxel_size);
+    } else {
+        no_z = int ((max_z-min_z)/voxel_size)+voxel_size;}
+
+    std::cout<< '\n' << "x:  " << no_x <<"  y: " << no_y << "   z:  " << no_z;
+
+    // create vector for bbox
+    std::vector<Point> bbox;
+    bbox.emplace_back(min_x,min_y,min_z);
+    bbox.emplace_back(min_x+no_x*voxel_size, min_y+no_y*voxel_size, min_z+no_z*voxel_size);
+
+    for (std::vector<Point>::const_iterator i = bbox.begin(); i != bbox.end(); ++i){
+        std::cout << '\n' << *i <<' ';}
+
+    // create raster
 
 
     // to do
@@ -130,9 +162,9 @@ int main(int argc, const char* argv[]) {
     //  voxels = { 10, 10, 10 };
 
     // Voxelise
-    for (auto const& triangle : faces) {
-        // to do
-    }
+    // for (auto const& triangle : faces) {
+    // to do
+    //}
 
     // Fill model
     // to do
