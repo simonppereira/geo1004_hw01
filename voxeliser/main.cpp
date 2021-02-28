@@ -128,18 +128,18 @@ int main(int argc, const char* argv[]) {
     if (std::fmod((max_x-min_x),voxel_size) == 0){
         no_x = ((max_x-min_x)/voxel_size);
     } else {
-        no_x = ((max_x-min_x)/voxel_size)+voxel_size;}
+        no_x = ((max_x-min_x)/voxel_size)+1;}
 
     if (std::fmod((max_y-min_y),voxel_size) == 0){
         no_y = ((max_y-min_y)/voxel_size);
     } else {
-        no_y = ((max_y-min_y)/voxel_size)+voxel_size;}
+        no_y = ((max_y-min_y)/voxel_size)+1;}
     std::cout << '\n'<< no_y;
 
     if (std::fmod((max_z-min_z),voxel_size) == 0){
         no_z = int ((max_z-min_z)/voxel_size);
     } else {
-        no_z = int ((max_z-min_z)/voxel_size)+voxel_size;}
+        no_z = int ((max_z-min_z)/voxel_size)+1;}
 
     std::cout<< '\n' << "x:  " << no_x <<"  y: " << no_y << "   z:  " << no_z;
 
