@@ -18,11 +18,15 @@
 
 float signed_volume(const Point &a, const Point &b, const Point &c, const Point &d) {
   // to do
-    return 0;
+    return (((a-d)*((b-d)*(c-d))/6));
 }
 
 bool intersects(const Point &orig, const Point &dest, const Point &v0, const Point &v1, const Point &v2) {
-  // to do
+    if signed_volume() > 0 on one side && < 0 on other side {
+        if()//next if statement
+    }
+    else go to next voxel-face combination
+
     return 0;
 }
 
@@ -161,16 +165,36 @@ int main(int argc, const char* argv[]) {
 
     // Create the grid with just this line of code? yes but only a grid consisting out of indices
     VoxelGrid voxels(rows.x, rows.y, rows.z);
+    
+    //const Point& orig, const Point& dest, const Point& v0, const Point& v1, const Point& v2);
+
+    orig.x = min_x;
+    orig.y = min_y;
+    orig.z = min_z;
+
+    //bool intersects(const Point & orig, const Point & dest, const Point & v0, const Point & v1, const Point & v2) {
 
     // Iterate over the grid
     for (int i = 0; i < voxels.max_x; i++) {
         for (int j = 0; j < voxels.max_y; j++) {
             for (int k = 0; k < voxels.max_z; k++) {
                 std::cout << '\n' << "x:  " << i << "  y: " << j << "   z:  " << k;
+                for (std::vector<Point>::const_iterator i = faces.begin(); i != faces.end(); ++i) {
+                    if intersects(orig, xxxxxxxxx) = 1 {
+                        store the voxel(indices.x, y, z)
+                    }
+                    else go to next one 
+                }
             }
         }
 
     }
+
+    voxel(5,6,9)
+
+    x_center = min_x + voxel_size*5 + 0.5*voxel_size 
+    y_center = min_y + voxel_size*6 + 0.5*voxel_size 
+    Z_center = min_z + voxel_size*9 + 0.5*voxel_size
 
     // Voxelise
     // Meaby this is what I did abovve but than different?
