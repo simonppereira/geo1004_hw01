@@ -327,16 +327,31 @@ int main(int argc, const char* argv[]) {
                     if (intersects(orig1, dest1, v0, v1, v2)) {
                         std::cout << '\n' << " #p " << p << " left-right intersection";
                         //check for silvers
+                        /*if (intersection2){
+                            voxels(i, j, k) = 1;
+
+                        }*/
                     }
                     else if (intersects(orig2, dest2, v0, v1, v2)) {
                         std::cout << '\n' << " #p " << p << " front-back intersection";
                         //check for silvers
+                        /*if (intersection2){
+                            voxels(i, j, k) = 1;
+
+                        }*/
                     }
                     else if (intersects(orig3, dest3, v0, v1, v2)) {
                         std::cout << '\n' << " #p " << p << " bottom-top intersection";
                         //check for silvers
+                        /*if (intersection2){
+                            voxels(i, j, k) = 1;
+
+                        }*/
                     }
                     else { std::cout << '\n' << " #p " << p << " no intersection"; }
+
+
+
                 }
             }
         }
