@@ -251,7 +251,11 @@ bool intersects(const Point &orig, const Point &dest, const Point &v0, const Poi
         return true;
     } //next if statement
     else if (signed_volume(v0, v1, v2, orig) < 0 && signed_volume(v0, v1, v2, dest) > 0) {
-        return true;} //next if statement
+        return true;
+    } //next if statement
+    else if (signed_volume(v0, v1, v2, orig) == 0 || signed_volume(v0, v1, v2, dest) == 0) {
+        return false; //check on silvers
+    }
     else { return false; }
 }
 
@@ -314,8 +318,9 @@ int main(int argc, const char* argv[]) {
         min_y = min.y;
         min_z = min.z;
 
-        Rows test = face_rows(v0, v1, v2, voxel_size);
-        VoxelGrid voxels(test.x, test.y, test.z);
+        Rows rows = face_rows(v0, v1, v2, voxel_size);
+        VoxelGrid voxels(rows.x, rows.y, rows.z);
+
 
         for (int i = 0; i < voxels.max_x; i++) {
             for (int j = 0; j < voxels.max_y; j++) {
@@ -324,44 +329,74 @@ int main(int argc, const char* argv[]) {
                     orig2, dest2 = target2(voxel_size, i, j, k, min_x, min_y, min_z);
                     orig3, dest3 = target3(voxel_size, i, j, k, min_x, min_y, min_z);
                     p++;
+
+                    /*bool intersects(const Point &orig, const Point &dest, const Point &v0, const Point &v1, const Point &v2) {
+                        if (signed_volume(v0, v1, v2, orig) > 0 && signed_volume(v0, v1, v2, dest)*/
+
+                    //FirstTarget
                     if (intersects(orig1, dest1, v0, v1, v2)) {
-                        std::cout << '\n' << " #p " << p << " left-right intersection";
-                        //check for silvers
-                        /*if (intersection2){
+                        std::cout << '\n' << " #p " << p << " first intersection left-right - check";
+                        if (intersects(v0, v2, orig1, dest1, v1) && intersects(v1, v0, orig1, dest1, v2) &&
+                            intersects(v2, v1, orig1, dest1, v0)) {
+                            std::cout << ", second intersection - check";
                             voxels(i, j, k) = 1;
-
-                        }*/
+                            continue;
+                        }
+                        else { std::cout << ", second intersection - fail";
+                            goto SecondTarget;}
                     }
-                    else if (intersects(orig2, dest2, v0, v1, v2)) {
-                        std::cout << '\n' << " #p " << p << " front-back intersection";
-                        //check for silvers
-                        /*if (intersection2){
+                    else {goto SecondTarget;}
+
+                    SecondTarget:
+                    if (intersects(orig2, dest2, v0, v1, v2)) {
+                        std::cout << '\n' << " #p " << p << " first intersection front-back - check";
+                        if (intersects(v0, v2, orig2, dest2, v1) && intersects(v1, v0, orig2, dest2, v2) &&
+                            intersects(v2, v1, orig2, dest2, v0)) {
+                            std::cout << ", second intersection - check";
                             voxels(i, j, k) = 1;
-
-                        }*/
+                            continue;
+                        }
+                        else { std::cout << ", second intersection - fail";
+                            goto ThirdTarget;}
                     }
-                    else if (intersects(orig3, dest3, v0, v1, v2)) {
-                        std::cout << '\n' << " #p " << p << " bottom-top intersection";
-                        //check for silvers
-                        /*if (intersection2){
+                    else {goto ThirdTarget;}
+
+                    ThirdTarget:
+                    if (intersects(orig3, dest3, v0, v1, v2)) {
+                        std::cout << '\n' << " #p " << p << " first intersection bottom-top - check";
+                        if (intersects(v0, v2, orig3, dest3, v1) && intersects(v1, v0, orig3, dest3, v2) &&
+                            intersects(v2, v1, orig3, dest3, v0)) {
+                            std::cout << ", second intersection - check";
                             voxels(i, j, k) = 1;
-
-                        }*/
+                            continue;
+                        }
+                        else {
+                            std::cout << ", second intersection - fail";
+                            goto stop;}
                     }
-                    else { std::cout << '\n' << " #p " << p << " no intersection"; }
+                    else { goto stop; }
+
+                    stop:
+                    std::cout << '\n' << " #p " << p << " first intersection - fail";
+                    voxels(i, j, k) = 0;
+
+                    if (voxels(i, j, k) == 0){
 
 
+                    }
 
                 }
             }
         }
     }
 
+
+
     // Voxelise
     // Meaby this is what I did abovve but than different?
     for (auto const& triangle : faces) {
         // to do
-    }
+        }
 
     // Fill model
     // to do
