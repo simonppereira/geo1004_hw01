@@ -163,7 +163,7 @@ Rows face_rows(const Point& vf0, const Point& vf1, const Point& vf2, float voxel
     return frows;
 }*/
 
-Point bbox_min(std::vector<Point> fvertices, float voxel_size) {
+std::vector<Point> bbox(std::vector<Point> fvertices, float voxel_size) {
 
     // creating vector for each dimension x,y,z
     std::vector<float> x_dim;
@@ -252,99 +252,9 @@ Point bbox_min(std::vector<Point> fvertices, float voxel_size) {
     bbox_max.y = bbx_max_y;
     bbox_max.z = bbx_max_z;
 
+    std::vector<Point> bbox {bbox_min, bbox_max};
 
-    return bbox_min;
-}
-Point bbox_max(std::vector<Point> fvertices, float voxel_size) {
-
-    // creating vector for each dimension x,y,z
-    std::vector<float> x_dim;
-    std::vector<float> y_dim;
-    std::vector<float> z_dim;
-
-    for (std::vector<Point>::const_iterator i = fvertices.begin(); i != fvertices.end(); ++i) {
-        x_dim.push_back(i[0][0]);
-        y_dim.push_back(i[0][1]);
-        z_dim.push_back(i[0][2]);
-    }
-
-    // obtaining index of min/max
-    std::vector<float>::iterator result_maxx;
-    std::vector<float>::iterator result_maxy;
-    std::vector<float>::iterator result_maxz;
-
-    std::vector<float>::iterator result_minx;
-    std::vector<float>::iterator result_miny;
-    std::vector<float>::iterator result_minz;
-
-    result_maxx = std::max_element(x_dim.begin(), x_dim.end());
-    result_maxy = std::max_element(y_dim.begin(), y_dim.end());
-    result_maxz = std::max_element(z_dim.begin(), z_dim.end());
-
-    result_minx = std::min_element(x_dim.begin(), x_dim.end());
-    result_miny = std::min_element(y_dim.begin(), y_dim.end());
-    result_minz = std::min_element(z_dim.begin(), z_dim.end());
-
-    int index_x = std::distance(x_dim.begin(), result_maxx);
-    int index_y = std::distance(y_dim.begin(), result_maxy);
-    int index_z = std::distance(z_dim.begin(), result_maxz);
-
-    int index_minx = std::distance(x_dim.begin(), result_minx);
-    int index_miny = std::distance(y_dim.begin(), result_miny);
-    int index_minz = std::distance(z_dim.begin(), result_minz);
-
-    //vector indexing
-    float min_x = x_dim[index_minx];
-    float min_y = y_dim[index_miny];
-    float min_z = z_dim[index_minz];
-
-    float max_x = x_dim[index_x];
-    float max_y = y_dim[index_y];
-    float max_z = z_dim[index_z];
-
-    //determine number of voxel cells between min and max of x,y,z
-    int no_x = 0;
-    int no_y = 0;
-    int no_z = 0;
-
-    if (std::fmod((max_x - min_x), voxel_size) == 0) {
-        no_x = ((max_x - min_x) / voxel_size);
-    }
-    else {
-        no_x = ((max_x - min_x) / voxel_size) + 1;
-    }
-
-    if (std::fmod((max_y - min_y), voxel_size) == 0) {
-        no_y = ((max_y - min_y) / voxel_size);
-    }
-    else {
-        no_y = ((max_y - min_y) / voxel_size) + 1;
-    }
-
-    if (std::fmod((max_z - min_z), voxel_size) == 0) {
-        no_z = int((max_z - min_z) / voxel_size);
-    }
-    else {
-        no_z = int((max_z - min_z) / voxel_size) + 1;
-    }
-
-    float bbx_max_x = min_x + no_x * voxel_size;
-    float bbx_max_y = min_y + no_y * voxel_size;
-    float bbx_max_z = min_z + no_z * voxel_size;
-
-    Point bbox_min;
-    Point bbox_max;
-
-    bbox_min.x = min_x;
-    bbox_min.y = min_y;
-    bbox_min.z = min_z;
-
-    bbox_max.x = bbx_max_x;
-    bbox_max.y = bbx_max_y;
-    bbox_max.z = bbx_max_z;
-
-
-    return bbox_max;
+    return bbox;
 }
 
 bool intersects(const Point &orig, const Point &dest, const Point &v0, const Point &v1, const Point &v2) {
@@ -364,7 +274,7 @@ int main(int argc, const char* argv[]) {
     // I have added the path to the obj file. Local path so static and not dynamic.
     const char* file_in = "C:\\Users\\simon\\Desktop\\Stuff\\1. TU Delft\\2. Semester\\3. GEO1004 3D Modelling of the Built Environment\\1. Assignment\\repo\\geo1004_hw01\\bag_bk.obj";
     const char* file_out = "vox.obj";
-    float voxel_size = 1.0;
+    float voxel_size = 20.0;
 
     // Read file
     std::vector<Point> vertices;
@@ -496,8 +406,8 @@ int main(int argc, const char* argv[]) {
 
     int p;
     p = 0;
-
-    for (int t = 0; t < faces.size(); t++) { //100 should be changed to max face which is somewhere in the 4000
+                    //faces.size()
+    for (int t = 0; t < 80; t++) { //100 should be changed to max face which is somewhere in the 4000
         int Iv0 = faces[t][0];
         int Iv1 = faces[t][1];
         int Iv2 = faces[t][2];
@@ -510,13 +420,15 @@ int main(int argc, const char* argv[]) {
         triangle.emplace_back(v1);
         triangle.emplace_back(v2);
 
+        std::vector<Point> bbox_tri = bbox(triangle, voxel_size);
         Point min;
         Point max;
+
         float min_x, min_y, min_z;
         float max_x, max_y, max_z;
 
-        min = bbox_min(triangle, voxel_size);
-        max = bbox_max(triangle, voxel_size);
+        min = bbox_tri[0];
+        max = bbox_tri[1];
 
         //std::cout << '\n' << " min: " << min << "max: " << max;
 
@@ -577,7 +489,7 @@ int main(int argc, const char* argv[]) {
                         std::cout << '\n' << " #p " << p << " first intersection front-back - check";
                         if (intersects(v0, v1, orig2, dest2, v2) && intersects(v2, v0, orig2, dest2, v1) &&
                             intersects(v1, v2, orig2, dest2, v0)) {
-                            std::cout << "\n, second intersection - check";
+                            std::cout << ", second intersection - check";
                             //voxels(i, j, k) = 1;
                             continue;
                         }
