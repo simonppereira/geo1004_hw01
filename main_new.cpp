@@ -335,9 +335,9 @@ int main(int argc, const char* argv[]) {
             for (int k = 0; k < no_z; k++) {
                 // std::cout<<"something";
                 voxels(i, j, k) = 0;
-                }
             }
         }
+    }
 
     int q = 0;
     // to prevent double variable names
@@ -427,7 +427,7 @@ int main(int argc, const char* argv[]) {
                         //std::cout << '\n' << " #p " << p << " first intersection left-right - fail";
                         goto SecondTarget; }
 
-                SecondTarget:
+                    SecondTarget:
                     if (intersects(orig2, dest2, v0, v1, v2)) {
                         //std::cout << '\n' << " #p " << p << " first intersection front-back - check";
                         if (intersects(v0, v1, orig2, dest2, v2) && intersects(v2, v0, orig2, dest2, v1) &&
@@ -446,7 +446,7 @@ int main(int argc, const char* argv[]) {
                         //std::cout << '\n' << " #p " << p << " first intersection front-back - fail";
                         goto ThirdTarget; }
 
-                ThirdTarget:
+                    ThirdTarget:
                     if (intersects(orig3, dest3, v0, v1, v2)) {
                         //std::cout << '\n' << " #p " << p << " first intersection bottom-top - check";
                         if (intersects(v0, v1, orig3, dest3, v2) && intersects(v2, v0, orig3, dest3, v1) &&
