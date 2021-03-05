@@ -335,44 +335,48 @@ int main(int argc, const char* argv[]) {
                     Point LBT;
                     Point RBT;
 
+                    //reduce voxelsize for visualisation
+                    float voxel_size_reduced = voxel_size * 0.9;
+                    float buffer = voxel_size * 0.1;
+
                     //origin / left-front-bottom
-                    LFB.x = min_overal.x + i * voxel_size;
-                    LFB.y = min_overal.y + j * voxel_size;
-                    LFB.z = min_overal.z + k * voxel_size;
+                    LFB.x = min_overal.x + i * voxel_size + buffer;
+                    LFB.y = min_overal.y + j * voxel_size + buffer;
+                    LFB.z = min_overal.z + k * voxel_size + buffer;
 
                     //left-front-top
-                    LFT.x = min_overal.x + i * voxel_size;
-                    LFT.y = min_overal.y + j * voxel_size;
-                    LFT.z = min_overal.z + k * voxel_size + voxel_size;
+                    LFT.x = min_overal.x + i * voxel_size + buffer;
+                    LFT.y = min_overal.y + j * voxel_size + buffer;
+                    LFT.z = min_overal.z + k * voxel_size + voxel_size_reduced;
 
                     //left-back-bottom
-                    LBB.x = min_overal.x + i * voxel_size;
-                    LBB.y = min_overal.y + j * voxel_size + voxel_size;
-                    LBB.z = min_overal.z + k * voxel_size;
+                    LBB.x = min_overal.x + i * voxel_size + buffer;
+                    LBB.y = min_overal.y + j * voxel_size + voxel_size_reduced;
+                    LBB.z = min_overal.z + k * voxel_size + buffer;
 
                     //left-back-top
-                    LBT.x = min_overal.x + i * voxel_size;
-                    LBT.y = min_overal.y + j * voxel_size + voxel_size;
-                    LBT.z = min_overal.z + k * voxel_size + voxel_size;
+                    LBT.x = min_overal.x + i * voxel_size + buffer;
+                    LBT.y = min_overal.y + j * voxel_size + voxel_size_reduced;
+                    LBT.z = min_overal.z + k * voxel_size + voxel_size_reduced;
 
                     //right-front-bottom
-                    RFB.x = min_overal.x + i * voxel_size + voxel_size;
-                    RFB.y = min_overal.y + j * voxel_size;
-                    RFB.z = min_overal.z + k * voxel_size;
+                    RFB.x = min_overal.x + i * voxel_size + voxel_size_reduced;
+                    RFB.y = min_overal.y + j * voxel_size + buffer;
+                    RFB.z = min_overal.z + k * voxel_size + buffer;
 
                     //right-front-top
-                    RFT.x = min_overal.x + i * voxel_size + voxel_size;
-                    RFT.y = min_overal.y + j * voxel_size;
-                    RFT.z = min_overal.z + k * voxel_size + voxel_size;
+                    RFT.x = min_overal.x + i * voxel_size + voxel_size_reduced;
+                    RFT.y = min_overal.y + j * voxel_size + buffer;
+                    RFT.z = min_overal.z + k * voxel_size + voxel_size_reduced;
 
                     //right-back-bottom
-                    RBB.x = min_overal.x + i * voxel_size + voxel_size;
-                    RBB.y = min_overal.y + j * voxel_size + voxel_size;
-                    RBB.z = min_overal.z + k * voxel_size;
+                    RBB.x = min_overal.x + i * voxel_size + voxel_size_reduced;
+                    RBB.y = min_overal.y + j * voxel_size + voxel_size_reduced;
+                    RBB.z = min_overal.z + k * voxel_size + buffer;
 
-                    RBT.x = min_overal.x + i * voxel_size + voxel_size;
-                    RBT.y = min_overal.y + j * voxel_size + voxel_size;
-                    RBT.z = min_overal.z + k * voxel_size + voxel_size;
+                    RBT.x = min_overal.x + i * voxel_size + voxel_size_reduced;
+                    RBT.y = min_overal.y + j * voxel_size + voxel_size_reduced;
+                    RBT.z = min_overal.z + k * voxel_size + voxel_size_reduced;
 
                     fl << "v " << LFB.x << ' ' << LFB.y << ' ' << LFB.z << std::endl;
                     fl << "v " << LFT.x << ' ' << LFT.y << ' ' << LFT.z << std::endl;
