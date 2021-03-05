@@ -4,23 +4,33 @@
 #include <string>
 #include <sstream>
 #include <assert.h>
-#include <cmath>
-#include <algorithm>
-#include <list>
-#include <numeric>
-#include <random>
-
 
 #include "Point.h"
 #include "Rows.h"
 #include "VoxelGrid.h"
 
-#include <stdio.h>
+//define function for finding the actual min and max value of a bounding box
+std::vector<Point> bbox(std::vector<Point> vertices) {
 
-float signed_volume(const Point& a, const Point& b, const Point& c, const Point& d) {
-    return ((a - d).dot((b - d).cross(c - d))) / 6;
+    // creating vector for each dimension x,y,z
+    Point bbox_min = vertices.front();
+    Point bbox_max = vertices.front();
+
+    for (std::vector<Point>::const_iterator i = vertices.begin(); i != vertices.end(); ++i) {
+        if (i->x < bbox_min.x) bbox_min.x = i->x;
+        if (i->y < bbox_min.y) bbox_min.y = i->y;
+        if (i->z < bbox_min.z) bbox_min.z = i->z;
+        if (i->x > bbox_max.x) bbox_max.x = i->x;
+        if (i->y > bbox_max.y) bbox_max.y = i->y;
+        if (i->z > bbox_max.z) bbox_max.z = i->z;
+    }
+
+    std::vector<Point> bbox{ bbox_min, bbox_max };
+
+    return bbox;
 }
-//const Point target1(float voxel_size, int i, int j, int k, float min_x, float min_y, float min_z) {
+
+//define function for finding the target line left right
 std::vector<Point> target1(float voxel_size, int i, int j, int k, float min_x, float min_y, float min_z) {
     Point orgBB;
     Point orig;
@@ -41,7 +51,8 @@ std::vector<Point> target1(float voxel_size, int i, int j, int k, float min_x, f
 
     return points;
 }
-//const Point target2(float voxel_size, int i, int j, int k, float min_x, float min_y, float min_z) {
+
+//define function for finding the target line front back
 std::vector<Point> target2(float voxel_size, int i, int j, int k, float min_x, float min_y, float min_z) {
     Point orgBB;
     Point orig;
@@ -63,6 +74,7 @@ std::vector<Point> target2(float voxel_size, int i, int j, int k, float min_x, f
     return points;
 }
 
+//define funtion for finding the target line bottom top 
 std::vector<Point> target3(float voxel_size, int i, int j, int k, float min_x, float min_y, float min_z) {
     Point orgBB;
     Point orig;
@@ -84,101 +96,13 @@ std::vector<Point> target3(float voxel_size, int i, int j, int k, float min_x, f
     return points;
 }
 
-std::vector<Point> bbox(std::vector<Point> fvertices, float voxel_size) {
-
-    // creating vector for each dimension x,y,z
-    std::vector<float> x_dim;
-    std::vector<float> y_dim;
-    std::vector<float> z_dim;
-
-    for (std::vector<Point>::const_iterator i = fvertices.begin(); i != fvertices.end(); ++i) {
-        x_dim.push_back(i[0][0]);
-        y_dim.push_back(i[0][1]);
-        z_dim.push_back(i[0][2]);
-    }
-
-    // obtaining index of min/max
-    std::vector<float>::iterator result_maxx;
-    std::vector<float>::iterator result_maxy;
-    std::vector<float>::iterator result_maxz;
-
-    std::vector<float>::iterator result_minx;
-    std::vector<float>::iterator result_miny;
-    std::vector<float>::iterator result_minz;
-
-    result_maxx = std::max_element(x_dim.begin(), x_dim.end());
-    result_maxy = std::max_element(y_dim.begin(), y_dim.end());
-    result_maxz = std::max_element(z_dim.begin(), z_dim.end());
-
-    result_minx = std::min_element(x_dim.begin(), x_dim.end());
-    result_miny = std::min_element(y_dim.begin(), y_dim.end());
-    result_minz = std::min_element(z_dim.begin(), z_dim.end());
-
-    int index_x = std::distance(x_dim.begin(), result_maxx);
-    int index_y = std::distance(y_dim.begin(), result_maxy);
-    int index_z = std::distance(z_dim.begin(), result_maxz);
-
-    int index_minx = std::distance(x_dim.begin(), result_minx);
-    int index_miny = std::distance(y_dim.begin(), result_miny);
-    int index_minz = std::distance(z_dim.begin(), result_minz);
-
-    //vector indexing
-    float min_x = x_dim[index_minx];
-    float min_y = y_dim[index_miny];
-    float min_z = z_dim[index_minz];
-
-    float max_x = x_dim[index_x];
-    float max_y = y_dim[index_y];
-    float max_z = z_dim[index_z];
-
-    //determine number of voxel cells between min and max of x,y,z
-    int no_x = 0;
-    int no_y = 0;
-    int no_z = 0;
-
-    if (std::fmod((max_x - min_x), voxel_size) == 0) {
-        no_x = ((max_x - min_x) / voxel_size);
-    }
-    else {
-        no_x = ((max_x - min_x) / voxel_size) + 1;
-    }
-
-    if (std::fmod((max_y - min_y), voxel_size) == 0) {
-        no_y = ((max_y - min_y) / voxel_size);
-    }
-    else {
-        no_y = ((max_y - min_y) / voxel_size) + 1;
-    }
-    //std::cout << '\n'<< no_y;
-
-    if (std::fmod((max_z - min_z), voxel_size) == 0) {
-        no_z = int((max_z - min_z) / voxel_size);
-    }
-    else {
-        no_z = int((max_z - min_z) / voxel_size) + 1;
-    }
-
-    float bbx_max_x = min_x + no_x * voxel_size;
-    float bbx_max_y = min_y + no_y * voxel_size;
-    float bbx_max_z = min_z + no_z * voxel_size;
-
-    Point bbox_min;
-    Point bbox_max;
-
-    bbox_min.x = min_x;
-    bbox_min.y = min_y;
-    bbox_min.z = min_z;
-
-    bbox_max.x = bbx_max_x;
-    bbox_max.y = bbx_max_y;
-    bbox_max.z = bbx_max_z;
-
-    std::vector<Point> bbox{ bbox_min, bbox_max };
-
-    return bbox;
+//define formula for calculating the signed volume
+float signed_volume(const Point& a, const Point& b, const Point& c, const Point& d) {
+    return ((a - d).dot((b - d).cross(c - d))) / 6;
 }
 
-bool intersects(const Point& orig, const Point& dest, const Point& v0, const Point& v1, const Point& v2) {
+//define intersection condition, return true if intersection condition is met
+bool intersects(const Point & orig, const Point & dest, const Point & v0, const Point & v1, const Point & v2) {
     if (signed_volume(v0, v1, v2, orig) > 0 && signed_volume(v0, v1, v2, dest) < 0) {
         return true;
     } //next if statement
@@ -192,24 +116,25 @@ bool intersects(const Point& orig, const Point& dest, const Point& v0, const Poi
 }
 
 int main(int argc, const char* argv[]) {
-    // I have added the path to the obj file. Local path so static and not dynamic.
+    //I have added the path to the obj file. Local path so static and not dynamic.
     const char* file_in = "C:/Users/s161887/Documents/GitHub/geo1004_hw01_test/geo1004_hw01_test/bag_bk.obj";
-    const char* file_out = "vox.obj";
+    const char* file_out = "C:/Users/s161887/Documents/GitHub/geo1004_hw01_test/geo1004_hw01_test/output.obj";
     float voxel_size = 1.0;
 
-    // Read file
+    //read file
     std::vector<Point> vertices;
     std::vector<std::vector<unsigned int>> faces;
     std::string line;
-    //std::string type;
     std::ifstream in(file_in, std::ios::in);
 
+    //give an error if the file cannot be opened
     if (!in)
     {
         std::cerr << "Cannot open" << file_in << std::endl;
         exit(1);
     }
 
+    //read and parse the vertices and faces in the obj file
     while (std::getline(in, line))
     {
         std::istringstream vert(line);
@@ -227,234 +152,292 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    // Set some iteration variables
-    std::vector<float> x_dim;
-    std::vector<float> y_dim;
-    std::vector<float> z_dim;
+    //find the exact values of the bounding box
+    std::vector<Point> bbox_overal = bbox(vertices);
+    Point min_overal = bbox_overal[0];
+    Point max_overal = bbox_overal[1];
 
-    for (std::vector<Point>::const_iterator i = vertices.begin(); i != vertices.end(); ++i) {
-        //std::cout << i[0][1]<<' ';
-        x_dim.push_back(i[0][0]);
-        y_dim.push_back(i[0][1]);
-        z_dim.push_back(i[0][2]);
-    }
-
-    // obtaining index of min/max
-    std::vector<float>::iterator result_maxx;
-    std::vector<float>::iterator result_maxy;
-    std::vector<float>::iterator result_maxz;
-
-    std::vector<float>::iterator result_minx;
-    std::vector<float>::iterator result_miny;
-    std::vector<float>::iterator result_minz;
-
-    result_maxx = std::max_element(x_dim.begin(), x_dim.end());
-    result_maxy = std::max_element(y_dim.begin(), y_dim.end());
-    result_maxz = std::max_element(z_dim.begin(), z_dim.end());
-
-    result_minx = std::min_element(x_dim.begin(), x_dim.end());
-    result_miny = std::min_element(y_dim.begin(), y_dim.end());
-    result_minz = std::min_element(z_dim.begin(), z_dim.end());
-
-    int index_x = std::distance(x_dim.begin(), result_maxx);
-    int index_y = std::distance(y_dim.begin(), result_maxy);
-    int index_z = std::distance(z_dim.begin(), result_maxz);
-
-    int index_minx = std::distance(x_dim.begin(), result_minx);
-    int index_miny = std::distance(y_dim.begin(), result_miny);
-    int index_minz = std::distance(z_dim.begin(), result_minz);
-
-    //vector indexing
-    float min_x = x_dim[index_minx];
-    float min_y = y_dim[index_miny];
-    float min_z = z_dim[index_minz];
-
-    float max_x = x_dim[index_x];
-    float max_y = y_dim[index_y];
-    float max_z = z_dim[index_z];
-
-
-    std::cout << "max_x: " << max_x << '\n' << "max_y: " << max_y << '\n' << "max_z: " << max_z << '\n' << '\n';
-    std::cout << "min_x: " << min_x << '\n' << "min_y: " << min_y << '\n' << "min_z: " << min_z;
-
-    //determine number of voxel cells between min and max of x,y,z
-    unsigned int no_x = 0;
-    unsigned int no_y = 0;
-    unsigned int no_z = 0;
-
-    if (std::fmod((max_x - min_x), voxel_size) == 0) {
-        no_x = ((max_x - min_x) / voxel_size);
-    }
-    else {
-        no_x = ((max_x - min_x) / voxel_size) + 1;
-    }
-
-    if (std::fmod((max_y - min_y), voxel_size) == 0) {
-        no_y = ((max_y - min_y) / voxel_size);
-    }
-    else {
-        no_y = ((max_y - min_y) / voxel_size) + 1;
-    }
-    std::cout << '\n' << no_y;
-
-    if (std::fmod((max_z - min_z), voxel_size) == 0) {
-        no_z = ((max_z - min_z) / voxel_size);
-    }
-    else {
-        no_z = ((max_z - min_z) / voxel_size) + 1;
-    }
-
-    std::cout << '\n' << "x:  " << no_x << "  y: " << no_y << "   z:  " << no_z << faces.size();
-
-    // create vector for bbox
-    float bbx_max_x = min_x + no_x * voxel_size;
-    float bbx_max_y = min_y + no_y * voxel_size;
-    float bbx_max_z = min_z + no_z * voxel_size;
-
-    Point bbox_min_p;
-    Point bbox_max_p;
-
-    bbox_min_p.x = min_x;
-    bbox_min_p.y = min_y;
-    bbox_min_p.z = min_z;
-
-    bbox_max_p.x = bbx_max_x;
-    bbox_max_p.y = bbx_max_y;
-    bbox_max_p.z = bbx_max_z;
-
-    Rows rows = { no_x, no_y, no_z };
+    //find the number of rows in every direction, also described as the number of indices of the voxels in every direction. 
+    int row_x = ceil((max_overal.x - min_overal.x) / voxel_size);
+    int row_y = ceil((max_overal.y - min_overal.y) / voxel_size);
+    int row_z = ceil((max_overal.z - min_overal.z) / voxel_size);
+    Rows rows(row_x, row_y, row_z);
     VoxelGrid voxels(rows.x, rows.y, rows.z);
 
-    int p, q;
-    p = 0;
-    q = 0;
+    //print some data on the overal bounding box of the model
+    std::cout << '\n' << "maxoveralx: " << max_overal.x << " maxoveraly " << max_overal.y << " maxoveralz " << max_overal.z;
+    std::cout << '\n' << "minoveralx: " << min_overal.x << " minoveraly " << min_overal.y << " minoveralz " << min_overal.z;
+    std::cout << '\n' << "row_x: " << row_x << " row_y " << row_y << " row_z " << row_z;
 
-    // to prevent double variable names
-    float testmin_x = min_x;
-    float testmin_y = min_y;
-    float testmin_z = min_z;
+    //give every voxel in the overal voxelgrid a value of 0. Later 0 a value of 0 is used to identify a voxel as part of the interior. 
+    //If a voxel intersects it will be given a value of 1 later in the code. If a voxel is outside of the building it will be given a value of 2 later in the code.
+    for (int i = 0; i < row_x; i++) {
+        for (int j = 0; j < row_y; j++) {
+            for (int k = row_z - 1; k >= 0; k--) {
+                voxels(i, j, k) == 0;
+            }
+        }
+    }
 
-    for (int t = 0; t < faces.size(); t++) { //100 should be changed to max face which is somewhere in the 4000
-        int Iv0 = faces[t][0];
-        int Iv1 = faces[t][1];
-        int Iv2 = faces[t][2];
+    //iterate through all faces of the original model. For every face find the bounding box. Iterate through the voxels in the bounding box of every face. Find the voxels that intersect with the face. 
+    for (int f = 0; f < faces.size(); f++) {
 
-        Point v0 = vertices[Iv0];
-        Point v1 = vertices[Iv1];
-        Point v2 = vertices[Iv2];
+        //getting the exact value of the vertices of the face
+        int index_v0 = faces[f][0];
+        int index_v1 = faces[f][1];
+        int index_v2 = faces[f][2];
 
-        std::vector<Point> triangle;
-        triangle.emplace_back(v0);
-        triangle.emplace_back(v1);
-        triangle.emplace_back(v2);
+        Point v0 = vertices[index_v0-1];
+        Point v1 = vertices[index_v1-1];
+        Point v2 = vertices[index_v2-1];
 
-        std::vector<Point> bbox_tri = bbox(triangle, voxel_size);
-        Point min;
-        Point max;
+        //getting the exact min and max of the bounding box of the face
+        std::vector<Point> vertices_face{ v0, v1, v2 };
 
-        float min_x, min_y, min_z;
-        float max_x, max_y, max_z;
+        std::vector<Point> bbox_face = bbox(vertices_face);
+        Point min_face = bbox_face[0];
+        Point max_face = bbox_face[1];
 
-        min = bbox_tri[0];
-        max = bbox_tri[1];
+        //setting the index values of the voxels that are the min and max of the bounding box of the face
+        int min_face_x = floor((min_face.x - min_overal.x) / voxel_size);
+        int min_face_y = floor((min_face.y - min_overal.y) / voxel_size);
+        int min_face_z = floor((min_face.z - min_overal.z) / voxel_size);
+        int max_face_x = ceil((max_face.x - min_overal.x) / voxel_size);
+        int max_face_y = ceil((max_face.y - min_overal.y) / voxel_size);
+        int max_face_z = ceil((max_face.z - min_overal.z) / voxel_size);
 
-        min_x = min.x;
-        min_y = min.y;
-        min_z = min.z;
+        //iterate through the voxels that are within the bounding box of the face
+        for (int i = min_face_x; i < max_face_x; i++) {
+            for (int j = min_face_y; j < max_face_y; j++) {
+                for (int k = min_face_z; k < max_face_z; k++) {
 
-        max_x = max.x;
-        max_y = max.y;
-        max_z = max.z;
-
-        //testminx,y,z = the min index value expressed in in index value of the overall voxelgrid for the boundingbox of every face
-        int testminx, testminy, testminz, testmaxx, testmaxy, testmaxz;
-        testminx = std::floor((min_x-testmin_x) / voxel_size);
-        testminy = std::floor((min_y-testmin_y) / voxel_size);
-        testminz = std::floor((min_z-testmin_z) / voxel_size);
-        testmaxx = std::ceil((max_x- testmin_x) / voxel_size);
-        testmaxy = std::ceil((max_y- testmin_y) / voxel_size);
-        testmaxz = std::ceil((max_z- testmin_z) / voxel_size);
-
-        //::cout << '\n' << "minindexofface: " << testminx << ", actualvalueofface: " << min_x;
-
-        for (int i = testminx; i < testmaxx; i++) {
-            for (int j = testminy; j < testmaxy; j++) {
-                for (int k = testminz; k < testmaxz; k++) {
-
-                    std::vector<Point> tar1 = target1(voxel_size, i, j, k, testmin_x, testmin_y, testmin_z);
+                    //define the three target lines for every voxel. The target lines are checked on intersection. 
+                    //The target lines go from the center of every face of the voxel to the center of the opposite face of the voxel
+                    std::vector<Point> tar1 = target1(voxel_size, i, j, k, min_overal.x, min_overal.y, min_overal.z);
+                    assert(tar1.size() == 2);
                     Point orig1 = tar1[0];
                     Point dest1 = tar1[1];
 
-                    std::vector<Point> tar2 = target2(voxel_size, i, j, k, testmin_x, testmin_y, testmin_z);
+                    std::vector<Point> tar2 = target2(voxel_size, i, j, k, min_overal.x, min_overal.y, min_overal.z);
+                    assert(tar2.size() == 2);
                     Point orig2 = tar2[0];
                     Point dest2 = tar2[1];
 
-                    std::vector<Point> tar3 = target3(voxel_size, i, j, k, testmin_x, testmin_y, testmin_z);
+                    std::vector<Point> tar3 = target3(voxel_size, i, j, k, min_overal.x, min_overal.y, min_overal.z);
+                    assert(tar3.size() == 2);
                     Point orig3 = tar3[0];
                     Point dest3 = tar3[1];
 
-                    p++;
-
+                    //Check the target lines on intersection. If a target line is found to intersect, define the voxel to intersect by giving it a value of 1 and go to the next voxel.
                     //FirstTarget
                     if (intersects(orig1, dest1, v0, v1, v2)) {
-                        //std::cout << '\n' << " #p " << p << " first intersection left-right - check";
                         if (intersects(v0, v1, orig1, dest1, v2) && intersects(v2, v0, orig1, dest1, v1) &&
                             intersects(v1, v2, orig1, dest1, v0)) {
-                            q++;
-                            std::cout << '\n' << " #q " << q << " #p " << p << " Second intersection - check" << " x: " << i << " y: " << j << " z: " << k;
-                            //voxels(i, j, k) = 1;
+                            voxels(i, j, k) = 1;
                             continue;
                         }
                         else {
-                            //std::cout << ", second intersection - fail";
                             goto SecondTarget;
                         }
                     }
-                    else { 
-                        //std::cout << '\n' << " #p " << p << " first intersection left-right - fail";
-                        goto SecondTarget; }
+                    else {
+                        goto SecondTarget;
+                    }
 
                 SecondTarget:
                     if (intersects(orig2, dest2, v0, v1, v2)) {
-                        //std::cout << '\n' << " #p " << p << " first intersection front-back - check";
                         if (intersects(v0, v1, orig2, dest2, v2) && intersects(v2, v0, orig2, dest2, v1) &&
                             intersects(v1, v2, orig2, dest2, v0)) {
-                            q++;
-                            std::cout << '\n' << " #q " << q << " #p " << p << " Second intersection - check" << " x: " << i << " y: " << j << " z: " << k;
-                            //voxels(i, j, k) = 1;
+                            voxels(i, j, k) = 1;
                             continue;
                         }
                         else {
-                            //std::cout << ", second intersection - fail";
                             goto ThirdTarget;
                         }
                     }
-                    else { 
-                        //std::cout << '\n' << " #p " << p << " first intersection front-back - fail";
-                        goto ThirdTarget; }
+                    else {
+                        goto ThirdTarget;
+                    }
 
                 ThirdTarget:
                     if (intersects(orig3, dest3, v0, v1, v2)) {
-                        //std::cout << '\n' << " #p " << p << " first intersection bottom-top - check";
                         if (intersects(v0, v1, orig3, dest3, v2) && intersects(v2, v0, orig3, dest3, v1) &&
                             intersects(v1, v2, orig3, dest3, v0)) {
-                            q++;
-                            std::cout << '\n' << " #q " << q << " #p " << p << " Second intersection - check" << " x: " << i << " y: " << j << " z: " << k;
-                            //voxels(i, j, k) = 1;
+                            voxels(i, j, k) = 1;
                             continue;
                         }
                         else {
-                            //std::cout << ", second intersection - fail";
                         }
                     }
                     else {
-                        //std::cout << '\n' << " #p " << p << " first intersection bottom-top - fail";
-                        voxels(i, j, k) = 0;
                     }
                 }
             }
         }
     }
+  
+    //giving the exterior voxels a value of 2
+    for (int i = 0; i < row_x; i++) {
+        for (int j = 0; j < row_y; j++) {
+            for (int k = row_z - 1; k >= 0; k--) {
+                if (voxels(i, j, k) == 0) {
+                    voxels(i, j, k) = 2;
+                }
+                else {
+                    break;
+                }
+            }
+        }
+    }
 
+    //calculating the volume. The boundary has been assumed to be half in the building and half outside the building. 
+
+    float vol_inside = 0;
+    float vol_boundary = 0;
+
+    for (int i = 0; i < row_x; i++) {
+        for (int j = 0; j < row_y; j++) {
+            for (int k = 0; k < row_z; k++) {
+                if (voxels(i, j, k) == 2) {
+                    continue;
+                }
+                else if (voxels(i, j, k) == 0) {
+                    vol_inside = vol_inside + pow(voxel_size, 3.0);
+                }
+                else if (voxels(i, j, k) == 1) {
+                    vol_boundary = vol_boundary + pow(voxel_size, 3.0);
+
+                }
+            }
+        }
+    }
+
+    float vol_total = vol_inside + 0.5 * vol_boundary;
+
+    std::cout << "total volume = " << vol_total;
+
+    //exporting the voxelized model to an obj file. Faces of voxels are transformed to triangles. 
+
+    std::fstream fl;
+    fl.open(file_out, std::fstream::in | std::fstream::out | std::fstream::trunc);
+
+    for (int i = 0; i < row_x; i++) {
+        for (int j = 0; j < row_y; j++) {
+            for (int k = 0; k < row_z; k++) {
+                if (voxels(i, j, k) != 2) {
+
+                    Point LFB;
+                    Point RFB;
+                    Point LBB;
+                    Point RBB;
+                    Point LFT;
+                    Point RFT;
+                    Point LBT;
+                    Point RBT;
+
+                    //origin / left-front-bottom
+                    LFB.x = min_overal.x + i * voxel_size;
+                    LFB.y = min_overal.y + j * voxel_size;
+                    LFB.z = min_overal.z + k * voxel_size;
+
+                    //left-front-top
+                    LFT.x = min_overal.x + i * voxel_size;
+                    LFT.y = min_overal.y + j * voxel_size;
+                    LFT.z = min_overal.z + k * voxel_size + voxel_size;
+
+                    //left-back-bottom
+                    LBB.x = min_overal.x + i * voxel_size;
+                    LBB.y = min_overal.y + j * voxel_size + voxel_size;
+                    LBB.z = min_overal.z + k * voxel_size;
+
+                    //left-back-top
+                    LBT.x = min_overal.x + i * voxel_size;
+                    LBT.y = min_overal.y + j * voxel_size + voxel_size;
+                    LBT.z = min_overal.z + k * voxel_size + voxel_size;
+
+                    //right-front-bottom
+                    RFB.x = min_overal.x + i * voxel_size + voxel_size;
+                    RFB.y = min_overal.y + j * voxel_size;
+                    RFB.z = min_overal.z + k * voxel_size;
+
+                    //right-front-top
+                    RFT.x = min_overal.x + i * voxel_size + voxel_size;
+                    RFT.y = min_overal.y + j * voxel_size;
+                    RFT.z = min_overal.z + k * voxel_size + voxel_size;
+
+                    //right-back-bottom
+                    RBB.x = min_overal.x + i * voxel_size + voxel_size;
+                    RBB.y = min_overal.y + j * voxel_size + voxel_size;
+                    RBB.z = min_overal.z + k * voxel_size;
+
+                    RBT.x = min_overal.x + i * voxel_size + voxel_size;
+                    RBT.y = min_overal.y + j * voxel_size + voxel_size;
+                    RBT.z = min_overal.z + k * voxel_size + voxel_size;
+
+                    fl << "v " << LFB.x << ' ' << LFB.y << ' ' << LFB.z << std::endl;
+                    fl << "v " << LFT.x << ' ' << LFT.y << ' ' << LFT.z << std::endl;
+                    fl << "v " << LBB.x << ' ' << LBB.y << ' ' << LBB.z << std::endl;
+                    fl << "v " << LBT.x << ' ' << LBT.y << ' ' << LBT.z << std::endl;
+                    fl << "v " << RFB.x << ' ' << RFB.y << ' ' << RFB.z << std::endl;
+                    fl << "v " << RFT.x << ' ' << RFT.y << ' ' << RFT.z << std::endl;
+                    fl << "v " << RBB.x << ' ' << RBB.y << ' ' << RBB.z << std::endl;
+                    fl << "v " << RBT.x << ' ' << RBT.y << ' ' << RBT.z << std::endl;
+                }
+            }
+        }
+    }
+
+    int index = 1;
+    for (int i = 0; i < row_x; i++) {
+        for (int j = 0; j < row_y; j++) {
+            for (int k = 0; k < row_z; k++) {
+                if (voxels(i, j, k) != 2) {
+
+                    Point LFB;
+                    Point RFB;
+                    Point LBB;
+                    Point RBB;
+                    Point LFT;
+                    Point RFT;
+                    Point LBT;
+                    Point RBT;
+
+                    //writing f LFB RFT LFT
+                    fl << "f " << (index + 0) << ' ' << (index + 5) << ' ' << (index + 1) << std::endl;
+                    //writing f LFB RFB RFT
+                    fl << "f " << (index + 0) << ' ' << (index + 4) << ' ' << (index + 5) << std::endl;
+
+                    //writing f RFB RBB RBT
+                    fl << "f " << (index + 4) << ' ' << (index + 6) << ' ' << (index + 7) << std::endl;
+                    //writing f RFB RBT RFT
+                    fl << "f " << (index + 4) << ' ' << (index + 7) << ' ' << (index + 5) << std::endl;
+
+                    //writing f RBB LBT RBT
+                    fl << "f " << (index + 6) << ' ' << (index + 3) << ' ' << (index + 7) << std::endl;
+                    //writing f RBB LBB LBT
+                    fl << "f " << (index + 6) << ' ' << (index + 2) << ' ' << (index + 3) << std::endl;
+
+                    //writing f LBB LFT LBT
+                    fl << "f " << (index + 2) << ' ' << (index + 1) << ' ' << (index + 3) << std::endl;
+                    //writing f LBB LFB LFT
+                    fl << "f " << (index + 2) << ' ' << (index + 0) << ' ' << (index + 1) << std::endl;
+
+                    //writing f LFT RBT LBT
+                    fl << "f " << (index + 1) << ' ' << (index + 7) << ' ' << (index + 3) << std::endl;
+                    //writing f LFT RFT RBT
+                    fl << "f " << (index + 1) << ' ' << (index + 5) << ' ' << (index + 7) << std::endl;
+
+                    //writing f LFB RBB LBB
+                    fl << "f " << (index + 0) << ' ' << (index + 6) << ' ' << (index + 2) << std::endl;
+                    //writing f LFB RFB RBB
+                    fl << "f " << (index + 0) << ' ' << (index + 4) << ' ' << (index + 6) << std::endl;
+
+                    index = index + 8;
+                }
+            }
+        }
+    }
+    fl.close();
+    
     return 0;
 }
