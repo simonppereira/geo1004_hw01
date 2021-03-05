@@ -84,85 +84,6 @@ std::vector<Point> target3(float voxel_size, int i, int j, int k, float min_x, f
     return points;
 }
 
-//funtion returning no_x, no_y, no_z
-//with input v0, v1, v2
-/*
-Rows face_rows(const Point& vf0, const Point& vf1, const Point& vf2, float voxel_size) {
-
-    std::vector<Point> fvertices;
-
-    fvertices.emplace_back(vf0.x, vf0.y, vf0.z);
-    fvertices.emplace_back(vf1.x, vf1.y, vf1.z);
-    fvertices.emplace_back(vf2.x, vf2.y, vf2.z);
-
-    std::vector<float> x_dim;
-    std::vector<float> y_dim;
-    std::vector<float> z_dim;
-
-    for (std::vector<Point>::const_iterator i = fvertices.begin(); i != fvertices.end(); ++i) {
-        x_dim.push_back(i[0][0]);
-        y_dim.push_back(i[0][1]);
-        z_dim.push_back(i[0][2]);
-    }
-
-    std::vector<float>::iterator result_maxx;
-    std::vector<float>::iterator result_maxy;
-    std::vector<float>::iterator result_maxz;
-
-    std::vector<float>::iterator result_minx;
-    std::vector<float>::iterator result_miny;
-    std::vector<float>::iterator result_minz;
-
-    result_maxx = std::max_element(x_dim.begin(), x_dim.end());
-    result_maxy = std::max_element(y_dim.begin(), y_dim.end());
-    result_maxz = std::max_element(z_dim.begin(), z_dim.end());
-
-    result_minx = std::min_element(x_dim.begin(), x_dim.end());
-    result_miny = std::min_element(y_dim.begin(), y_dim.end());
-    result_minz = std::min_element(z_dim.begin(), z_dim.end());
-
-    int index_x = std::distance(x_dim.begin(), result_maxx);
-    int index_y = std::distance(y_dim.begin(), result_maxy);
-    int index_z = std::distance(z_dim.begin(), result_maxz);
-
-    int index_minx = std::distance(x_dim.begin(), result_minx);
-    int index_miny = std::distance(y_dim.begin(), result_miny);
-    int index_minz = std::distance(z_dim.begin(), result_minz);
-
-    //vector indexing
-    float fmin_x = x_dim[index_minx];
-    float fmin_y = y_dim[index_miny];
-    float fmin_z = z_dim[index_minz];
-
-    float fmax_x = x_dim[index_x];
-    float fmax_y = y_dim[index_y];
-    float fmax_z = z_dim[index_z];
-
-    //determine number of voxel cells between min and max of x,y,z
-    int fno_x = 0;
-    int fno_y = 0;
-    int fno_z = 0;
-
-    if (std::fmod((fmax_x - fmin_x), voxel_size) == 0) {
-        fno_x = ((fmax_x - fmin_x) / voxel_size);}
-    else {fno_x = ((fmax_x - fmin_x) / voxel_size) + 1;}
-
-    if (std::fmod((fmax_y - fmin_y), voxel_size) == 0) {
-        fno_y = ((fmax_y - fmin_y) / voxel_size);}
-    else {fno_y = ((fmax_y - fmin_y) / voxel_size) + 1;}
-
-    if (std::fmod((fmax_z - fmin_z), voxel_size) == 0) {
-        fno_z = int((fmax_z - fmin_z) / voxel_size);}
-    else {fno_z = int((fmax_z - fmin_z) / voxel_size) + 1;}
-
-    Rows frows;
-    frows.x = fno_x;
-    frows.y = fno_y;
-    frows.z = fno_z;
-
-    return frows;
-}*/
-
 std::vector<Point> bbox(std::vector<Point> fvertices, float voxel_size) {
 
     // creating vector for each dimension x,y,z
@@ -274,7 +195,7 @@ int main(int argc, const char* argv[]) {
     // I have added the path to the obj file. Local path so static and not dynamic.
     const char* file_in = "C:\\Users\\simon\\Desktop\\Stuff\\1. TU Delft\\2. Semester\\3. GEO1004 3D Modelling of the Built Environment\\1. Assignment\\repo\\geo1004_hw01\\bag_bk.obj";
     const char* file_out = "vox.obj";
-    float voxel_size = 20.0;
+    float voxel_size = 1.0;
 
     // Read file
     std::vector<Point> vertices;
@@ -403,11 +324,30 @@ int main(int argc, const char* argv[]) {
 
     Rows rows = {no_x, no_y, no_z};
     VoxelGrid voxels(rows.x, rows.y, rows.z);
+    //no x,y,z174 244 54
+    std::cout<< '\n'<< "no x,y,z"<< no_x <<' '<<no_y <<' ' <<no_z;
 
     int p;
     p = 0;
-                    //faces.size()
-    for (int t = 0; t < 80; t++) { //100 should be changed to max face which is somewhere in the 4000
+
+    for (int i = 0; i < no_x; i++) {
+        for (int j = 0; j < no_y; j++) {
+            for (int k = 0; k < no_z; k++) {
+                // std::cout<<"something";
+                voxels(i, j, k) = 0;
+            }
+        }
+    }
+
+    int q = 0;
+    // to prevent double variable names
+
+    float testmin_x = min_x;
+    float testmin_y = min_y;
+    float testmin_z = min_z;
+
+    //faces.size()
+    for (int t = 4600; t < faces.size(); t++) { //100 should be changed to max face which is somewhere in the 4000
         int Iv0 = faces[t][0];
         int Iv1 = faces[t][1];
         int Iv2 = faces[t][2];
@@ -440,93 +380,106 @@ int main(int argc, const char* argv[]) {
         max_y = max.y;
         max_z = max.z;
 
-        int f_minx = floor(min_x);
-        int f_miny = floor(min_y);
-        int f_minz = floor(min_z);
+        int testminx, testminy, testminz, testmaxx, testmaxy, testmaxz;
+        testminx = std::floor((min_x-testmin_x) / voxel_size);
+        testminy = std::floor((min_y-testmin_y) / voxel_size);
+        testminz = std::floor((min_z-testmin_z) / voxel_size);
+        testmaxx = std::floor((max_x- testmin_x) / voxel_size);
+        testmaxy = std::floor((max_y- testmin_y) / voxel_size);
+        testmaxz = std::floor((max_z- testmin_z) / voxel_size);
 
-        int f_maxx = ceil(max_x);
-        int f_maxy = ceil(max_y);
-        int f_maxz = ceil(max_z);
+        //::cout << '\n' << "minindexofface: " << testminx << ", actualvalueofface: " << min_x;
 
-        //std::cout << '\n' << " min: " << f_minx << ' ' << f_miny << ' '  << f_minz << ' '  << "max: " << f_maxx << ' '  << f_maxy << ' ' << f_maxz;
+        for (int i = testminx; i < testmaxx; i++) {
+            for (int j = testminy; j < testmaxy; j++) {
+                for (int k = testminz; k < testmaxz; k++) {
 
-        for (int i = f_minx; i < f_maxx; i++) {
-            for (int j = f_miny; j < f_maxy; j++) {
-                for (int k = f_minz; k < f_maxz; k++) {
-
-                    std::vector<Point> tar1 = target1(voxel_size, i, j, k, f_minx, f_miny, f_minz);
+                    std::vector<Point> tar1 = target1(voxel_size, i, j, k, testmin_x, testmin_y, testmin_z);
                     Point orig1 = tar1[0];
                     Point dest1 = tar1[1];
 
-                    std::vector<Point> tar2 = target2(voxel_size, i, j, k, f_minx, f_miny, f_minz);
+                    std::vector<Point> tar2 = target2(voxel_size, i, j, k, testmin_x, testmin_y, testmin_z);
                     Point orig2 = tar2[0];
                     Point dest2 = tar2[1];
 
-                    std::vector<Point> tar3 = target3(voxel_size, i, j, k, f_minx, f_miny, f_minz);
+                    std::vector<Point> tar3 = target3(voxel_size, i, j, k, testmin_x, testmin_y, testmin_z);
                     Point orig3 = tar3[0];
                     Point dest3 = tar3[1];
 
                     p++;
-                    /*bool intersects(const Point &orig, const Point &dest, const Point &v0, const Point &v1, const Point &v2) {
-                        if (signed_volume(v0, v1, v2, orig) > 0 && signed_volume(v0, v1, v2, dest)*/
 
-                //FirstTarget
+                    //FirstTarget
                     if (intersects(orig1, dest1, v0, v1, v2)) {
-                        std::cout << '\n' << " #p " << p << " first intersection left-right - check";
+                        //std::cout << '\n' << " #p " << p << " first intersection left-right - check";
                         if (intersects(v0, v1, orig1, dest1, v2) && intersects(v2, v0, orig1, dest1, v1) &&
                             intersects(v1, v2, orig1, dest1, v0)) {
-                            std::cout << ", second intersection - check";
-                            //voxels(i, j, k) = 1;
+                            q++;
+                            std::cout << '\n' << " #q " << q << " #p " << p << " Second intersection - check" << " x: " << i << " y: " << j << " z: " << k;
+                            voxels(i, j, k) = 1;
                             continue;
                         }
-                        else { std::cout << ", second intersection - fail";
-                            goto SecondTarget;}
+                        else {
+                            //std::cout << ", second intersection - fail";
+                            goto SecondTarget;
+                        }
                     }
-                    else {goto SecondTarget;}
+                    else {
+                        //std::cout << '\n' << " #p " << p << " first intersection left-right - fail";
+                        goto SecondTarget; }
 
                     SecondTarget:
                     if (intersects(orig2, dest2, v0, v1, v2)) {
-                        std::cout << '\n' << " #p " << p << " first intersection front-back - check";
+                        //std::cout << '\n' << " #p " << p << " first intersection front-back - check";
                         if (intersects(v0, v1, orig2, dest2, v2) && intersects(v2, v0, orig2, dest2, v1) &&
                             intersects(v1, v2, orig2, dest2, v0)) {
-                            std::cout << ", second intersection - check";
-                            //voxels(i, j, k) = 1;
+                            q++;
+                            std::cout << '\n' << " #q " << q << " #p " << p << " Second intersection - check" << " x: " << i << " y: " << j << " z: " << k;
+                            voxels(i, j, k) = 1;
                             continue;
                         }
-                        else { std::cout << ", second intersection - fail";
-                            goto ThirdTarget;}
+                        else {
+                            //std::cout << ", second intersection - fail";
+                            goto ThirdTarget;
+                        }
                     }
-                    else {goto ThirdTarget;}
+                    else {
+                        //std::cout << '\n' << " #p " << p << " first intersection front-back - fail";
+                        goto ThirdTarget; }
 
                     ThirdTarget:
                     if (intersects(orig3, dest3, v0, v1, v2)) {
-                        std::cout << '\n' << " #p " << p << " first intersection bottom-top - check";
+                        //std::cout << '\n' << " #p " << p << " first intersection bottom-top - check";
                         if (intersects(v0, v1, orig3, dest3, v2) && intersects(v2, v0, orig3, dest3, v1) &&
                             intersects(v1, v2, orig3, dest3, v0)) {
-                            std::cout << "\n, second intersection - check";
-                            //voxels(i, j, k) = 1;
+                            q++;
+                            std::cout << '\n' << " #q " << q << " #p " << p << " Second intersection - check" << " x: " << i << " y: " << j << " z: " << k;
+                            voxels(i, j, k) = 1;
                             continue;
                         }
-                        else {std::cout << ", second intersection - fail";
-                            goto stop;}
+                        else {
+                            //std::cout << ", second intersection - fail";
+                        }
                     }
-                    else { goto stop; }
+                    else {
+                        //std::cout << '\n' << " #p " << p << " first intersection bottom-top - fail";
 
-                    stop:                    ;
-                    //std::cout << '\n' << " #p " << p << " first intersection - fail";
-                    //voxels(i, j, k) = 0;
-
-                    /*if (voxels(i, j, k) == 0){
-
-
-                    }*/
-
+                    }
                 }
             }
         }
     }
 
-
+    /*int counter = 0;
+    for (int i = 0; i < no_x; i++) {
+        for (int j = 0; j < no_y; j++) {
+            for (int k = 0; k < no_z; k++) {
+                if(voxels(i, j, k) == 1) {
+                    ++counter;
+                    std::cout << '\n' << counter << " Value of 1 -> intersection";
+                }
+            }
+        }
+    }*/
 
     // Voxelise
     // Meaby this is what I did abovve but than different?
@@ -541,3 +494,4 @@ int main(int argc, const char* argv[]) {
 
     return 0;
 }
+
